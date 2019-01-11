@@ -1,0 +1,11 @@
+-r production.txt
+
+# Dependências para executar testes (Usar sempre as versões mais recentes)
+pytest
+pytest-cov
+pytest-django
+pytest-sugar
+coverage
+model-mommy
+
+pudb==2018.1

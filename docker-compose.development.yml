@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  builder:
+    build:
+      args:
+        requirements_file: development.txt    
+    environment:
+      ENV: development  
+
+  backend:    
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      ENV: development
+    ports:
+      - "8000:8000"
+
+  nginx:
+    image: nginx:1.13
+    volumes:      
+      - ./containers/nginx/conf.d/development.conf:/etc/nginx/conf.d/default.conf
+      - ./frontend/dist:/usr/share/nginx/html/frontend

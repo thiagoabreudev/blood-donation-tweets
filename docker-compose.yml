@@ -1,0 +1,71 @@
+version: "3"
+
+volumes:
+  db-data:
+  web-media:
+  web-static:
+  logs:
+
+services:
+  builder:
+    build:
+      context: .
+      dockerfile: containers/django/Dockerfile
+    image: app:latest
+    command: date
+
+  backend:
+    image: app:latest
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      ENV: development
+    ports:
+      - "8000:8000"
+    depends_on:
+      - builder
+      - db
+    volumes:
+      - ./backend:/app/backend
+      - web-static:/app/backend/staticfiles
+      - web-media:/app/backend/media
+      - logs:/var/log/backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+
+  db:
+    image: postgres:9.6
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "57002:5432"      
+    volumes:
+      - "db-data:/var/lib/postgresql/data"
+      - "./containers/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+
+  frontend:    
+    build:
+      context: .
+      dockerfile: containers/node/Dockerfile
+    image: frontend
+    # command: sh -c "cd /app/frontend/ && npm run serve"
+    # ports:
+    #   - "8087:8080"
+    volumes:
+      - .:/app
+      - ./frontend/dist:/app/frontend/dist
+    depends_on:
+        - backend
+  nginx:
+    image: nginx:1.13
+    ports: 
+      - "80:80"
+    depends_on:
+      - backend
