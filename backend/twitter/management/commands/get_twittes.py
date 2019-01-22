@@ -14,15 +14,15 @@ class Command(BaseCommand):
         access_token = oauth.Token(key=consumer_settings.access_token, secret=consumer_settings.access_token_secret)
         client = oauth.Client(consumer, access_token)
         for search_settings in TwitteSearchSetting.objects.all():
-            endpoint = "https://api.twitter.com/1.1/search/tweets.json?q={0}".format(search_settings.key_to_search)
+            endpoint = "https://api.twitter.com/1.1/search/tweets.json?q={0}&tweet_mode=extended".format(search_settings.key_to_search)
             response, data = client.request(endpoint)
             tweets = json.loads(data.decode('utf-8'))
             for twitte in tweets.get('statuses'):
-                if twitte.get('text')[0:2] != 'RT' and not Twitte.objects.filter(id_twitte=twitte.get('id_str')).exists():
+                if twitte.get('full_text')[0:2] != 'RT' and not Twitte.objects.filter(id_twitte=twitte.get('id_str')).exists():
                     new_twitte = Twitte()
                     new_twitte.twitte_json = twitte
                     new_twitte.id_twitte = twitte.get('id_str')
-                    new_twitte.text = twitte.get('text')
+                    new_twitte.text = twitte.get('full_text')
                     new_twitte.screen_name = twitte.get('user').get('screen_name')
                     new_twitte.retweeted = twitte.get('retweeted')
                     new_twitte.created_at = time.strftime('%Y-%m-%d %H:%M:%S',

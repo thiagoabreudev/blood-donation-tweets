@@ -15,10 +15,9 @@ class TwitteSearchSettingAdmin(admin.ModelAdmin):
 
 @admin.register(Twitte)
 class TwitteAdmin(admin.ModelAdmin):
-    list_display = ['created_at', 'screen_name', 'text', 'ask_donation', 
-    'donated_blood', 'intention_to_blood_donation', 'invalid', 'checked', 'show_link_twitte_url']
-    search_fields = ['text', 'screen_name']
-    list_editable = ['ask_donation', 'donated_blood', 'intention_to_blood_donation', 'invalid']
+    list_display = ['created_at', 'screen_name', 'text', 'category', 'show_link_twitte_url']
+    search_fields = ['text', 'screen_name']    
+    list_editable = ['category']
 
     def show_link_twitte_url(self, obj):
         return mark_safe('<a href="%s" target="_blank">%s</a>' % (obj.link_twitte, obj.link_twitte))

@@ -1,6 +1,17 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField
-# Create your models here.
+from enum import Enum
+
+
+class CategoryTwitte(Enum):
+  ASK_DONATION = 'Pedindo doação'
+  DONATED_BLOOD = 'Doou sangue'
+  INTENTION_TO_BLOOD_DONATION = 'Tem intenção de doar'
+  INVALID = "Inválido"
+
+
+  def __str__(self):
+    return self.name
 
 class TwitterSettings(models.Model):
   consumer_key = models.CharField(max_length=255, verbose_name='Consumer Key')
@@ -24,27 +35,12 @@ class Twitte(models.Model):
   text = models.TextField(verbose_name="Text")        
   screen_name = models.CharField(verbose_name="Usuário", max_length=255)        
   twitte_json = JSONField(null=True, blank=False, verbose_name='Twitte Json')
-  ask_donation = models.BooleanField(verbose_name='Ask Donation', default=False)
-  donated_blood = models.BooleanField(verbose_name='Donated blood', default=False)
-  intention_to_blood_donation = models.BooleanField(verbose_name='Intentio to blood donation', default=False)
-  invalid = models.BooleanField(verbose_name='Invalid', default=False)
-  checked = models.BooleanField(verbose_name='Checked', default=False)
+  category = models.CharField(verbose_name='Category', null=True, blank=True, max_length=255, choices=((x.name, x.value) for x in CategoryTwitte))
 
   @property
   def link_twitte(self):
       return "https://twitter.com/{screen_name}/status/{id_twitte}".format(screen_name=self.screen_name,
                                                                         id_twitte=self.id_twitte)
-
-  def save(self, *args, **kwargs):    
-    checks = [
-      self.ask_donation, self.donated_blood, self.intention_to_blood_donation, 
-      self.invalid
-    ]
-    if any(checks):
-      self.checked = True
-    else: 
-      self.checked = False
-    super().save(*args, **kwargs)
 
   class Meta:
       ordering = ['-created_at']
